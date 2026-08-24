@@ -1,0 +1,46 @@
+[project]
+name = "pca100-backend"
+version = "1.1.1"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "numpy>=2.0",
+    "colour-science>=0.4.4",
+    "scipy>=1.13",
+    "seabreeze>=2.9",
+    "pyusb>=1.2",
+    "pydantic>=2.7",
+    "pillow>=10.0",
+    "pywebview>=5.3",
+    "segno>=1.6",
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "import-linter>=2.0", "httpx>=0.27", "pytest-asyncio>=0.24", "pyinstaller>=6.11"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "C901", "PLR0912", "PLR0913", "PLR0915"]
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.mypy]
+strict = true
+[[tool.mypy.overrides]]
+module = ["colour.*", "seabreeze.*", "usb.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.importlinter]
+root_package = "pca"
+[[tool.importlinter.contracts]]
+name = "layers"
+type = "layers"
+layers = ["(pca.api)", "(pca.engine)", "(pca.agc) | (pca.pipeline) | (pca.colorimetry)", "(pca.calibration)", "(pca.device) | (pca.netguard)"]

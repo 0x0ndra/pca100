@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCA-100 - measurement patches</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; cursor: none; }
+  body { background: #000; }
+  #hud {
+    position: fixed; left: 16px; bottom: 16px;
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: #888; background: rgba(0, 0, 0, .75);
+    padding: 8px 12px; border-radius: 8px;
+    transition: opacity .4s; pointer-events: none;
+  }
+  #hud.hidden { opacity: 0; }
+  #hud b { color: #fff; }
+</style>
+</head>
+<body>
+<div id="hud"></div>
+<script>
+  // Solid full-screen patches for meter validation. In Display P3 where the
+  // browser supports it (any Mac with a P3 panel), sRGB otherwise, so "red"
+  // is the panel's actual red primary, not the sRGB one.
+  const p3 = CSS.supports('color', 'color(display-p3 1 0 0)')
+  const patch = (name, key, r, g, b) => ({
+    name, key,
+    css: p3 ? `color(display-p3 ${r} ${g} ${b})` : `rgb(${r * 255} ${g * 255} ${b * 255})`,
+  })
+  const PATCHES = [
+    patch('white', 'w', 1, 1, 1),
+    patch('red', 'r', 1, 0, 0),
+    patch('green', 'g', 0, 1, 0),
+    patch('blue', 'b', 0, 0, 1),
+    patch('cyan', 'c', 0, 1, 1),
+    patch('magenta', 'm', 1, 0, 1),
+    patch('yellow', 'y', 1, 1, 0),
+    patch('black', 'k', 0, 0, 0),
+  ]
+
+  const hud = document.getElementById('hud')
+  let index = 0
+  let hudTimer
+
+  function show(i) {
+    index = (i + PATCHES.length) % PATCHES.length
+    const p = PATCHES[index]
+    document.body.style.background = p.css
+    hud.innerHTML = `<b>${index + 1}/${PATCHES.length} ${p.name}</b> (${p.key})`
+      + `<br>${p3 ? 'Display P3' : 'sRGB'} · click/arrows = next, keys wrgbcmyk = jump to patch`
+      + `<br>f = fullscreen, h = hide label`
+    hud.classList.remove('hidden')
+    clearTimeout(hudTimer)
+    hudTimer = setTimeout(() => hud.classList.add('hidden'), 4000)
+  }
+
+  addEventListener('click', () => show(index + 1))
+  addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') return show(index + 1)
+    if (e.key === 'ArrowLeft') return show(index - 1)
+    if (e.key === 'h') return hud.classList.toggle('hidden')
+    if (e.key === 'f') {
+      return document.fullscreenElement
+        ? document.exitFullscreen()
+        : document.documentElement.requestFullscreen()
+    }
+    if (/^[1-8]$/.test(e.key)) return show(Number(e.key) - 1)
+    const jump = PATCHES.findIndex((p) => p.key === e.key)
+    if (jump >= 0) show(jump)
+  })
+
+  show(0)
+</script>
+</body>
+</html>

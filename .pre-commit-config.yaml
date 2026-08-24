@@ -1,0 +1,32 @@
+repos:
+  - repo: local
+    hooks:
+      - id: check-loc
+        name: max 300 LOC per file
+        entry: python3 scripts/check-loc.py
+        language: system
+        pass_filenames: false
+      - id: ruff
+        name: ruff
+        entry: bash -c 'cd backend && uv run ruff check .'
+        language: system
+        pass_filenames: false
+        files: ^backend/
+      - id: mypy
+        name: mypy
+        entry: bash -c 'cd backend && uv run mypy pca'
+        language: system
+        pass_filenames: false
+        files: ^backend/
+      - id: eslint
+        name: eslint
+        entry: bash -c 'cd frontend && npm run lint'
+        language: system
+        pass_filenames: false
+        files: ^frontend/
+      - id: tsc
+        name: tsc
+        entry: bash -c 'cd frontend && npm run typecheck'
+        language: system
+        pass_filenames: false
+        files: ^frontend/
